@@ -7,7 +7,7 @@ import {
   Param,
   Delete,
   Query,
-  UseGuards,
+  // UseGuards,
 } from '@nestjs/common';
 import { RegionService } from './region.service';
 import { CreateRegionDto } from './dto/create-region.dto';
@@ -16,16 +16,18 @@ import {
   ApiOperation,
   ApiQuery,
   ApiResponse,
-  ApiBearerAuth, // Import ApiBearerAuth
+  // ApiBearerAuth,
+  ApiTags, // Import ApiBearerAuth
 } from '@nestjs/swagger';
-import { AdminGuard } from '../common/guards/AdminGuard';
+// import { AdminGuard } from '../common/guards/AdminGuard';
 
+@ApiTags('Region')
 @Controller('region')
 export class RegionController {
   constructor(private readonly regionService: RegionService) {}
 
-  @UseGuards(AdminGuard)
-  @ApiBearerAuth() // Add Bearer Auth to this endpoint
+  // @UseGuards(AdminGuard)
+  // @ApiBearerAuth() // Add Bearer Auth to this endpoint
   @Post()
   @ApiOperation({ summary: 'Yangi region yaratish' })
   @ApiResponse({
@@ -57,8 +59,8 @@ export class RegionController {
     return this.regionService.findOne(+id);
   }
 
-  @UseGuards(AdminGuard)
-  @ApiBearerAuth() // Add Bearer Auth to this endpoint
+  // @UseGuards(AdminGuard)
+  // @ApiBearerAuth() // Add Bearer Auth to this endpoint
   @Put(':id')
   @ApiOperation({ summary: 'Regionni yangilash' })
   @ApiResponse({
@@ -71,8 +73,8 @@ export class RegionController {
     return this.regionService.update(+id, updateRegionDto);
   }
 
-  @UseGuards(AdminGuard)
-  @ApiBearerAuth() // Add Bearer Auth to this endpoint
+  // @UseGuards(AdminGuard)
+  // @ApiBearerAuth()
   @Delete(':id')
   @ApiOperation({ summary: "Regionni o'chirish" })
   @ApiResponse({

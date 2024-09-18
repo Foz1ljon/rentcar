@@ -156,11 +156,11 @@ export class UsersController {
   @ApiResponse({ status: 404, description: 'Foydalanuvchi topilmadi.' })
   async remove(@Param('id') id: string) {
     // Foydalanuvchini o'chirish
-    await this.usersService.remove(+id);
+    return this.usersService.remove(+id);
   }
 
   // Foydalanuvchini aktivatsiya qilish
-  @Get('activate')
+  @Post('activate')
   @ApiOperation({ summary: 'Foydalanuvchi hisobini aktivatsiya qilish' })
   @ApiResponse({
     status: 200,
@@ -172,6 +172,7 @@ export class UsersController {
     if (!token) {
       throw new InternalServerErrorException('Token zarur.');
     }
+
     await this.usersService.activateUser(token);
     return { message: 'Foydalanuvchi muvaffaqiyatli aktivlashtirildi.' };
   }

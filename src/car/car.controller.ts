@@ -26,7 +26,7 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from '../common/guards/UserGuard';
 
-@ApiTags('Cars')
+@ApiTags('Mashinalar')
 @Controller('car')
 export class CarController {
   constructor(private readonly carService: CarService) {}

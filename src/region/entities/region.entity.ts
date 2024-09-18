@@ -6,11 +6,11 @@ import { ApiProperty } from '@nestjs/swagger';
 @Entity('region')
 export class Region {
   @PrimaryGeneratedColumn()
-  @ApiProperty({ description: 'The unique identifier of the region' }) // Swagger property
+  @ApiProperty({ description: 'The unique identifier of the region' })
   id: number;
 
   @Column()
-  @ApiProperty({ description: 'The name of the region' }) // Swagger property
+  @ApiProperty({ description: 'The name of the region' })
   name: string;
 
   @OneToMany(() => District, (district) => district.region)

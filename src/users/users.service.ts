@@ -27,35 +27,40 @@ export class UsersService {
 
   // Foydalanuvchini login qilish
   async login(login: LoginUserDto, res: Response) {
-    try {
-      const user = await this.userRepository.findOneBy({ email: login.email });
+    const user = await this.userRepository.findOneBy({ email: login.email });
 
-      if (!user) {
-        throw new UnauthorizedException('Email topilmadi yoki parol xato');
-      }
-
-      const passwordMatch = await bcrypt.compare(login.password, user.password);
-      if (!passwordMatch) {
-        throw new UnauthorizedException('Email topilmadi yoki parol xato');
-      }
-
-      // Tokenlarni generatsiya qilish
-      const tokens = this.jwtService.generateTokens(user);
-
-      user.refreshtoken = await bcrypt.hash(tokens.refreshToken, 10);
-      await this.userRepository.save(user);
-
-      // Refresh tokenni cookiega saqlash
-      res.cookie('refreshToken', tokens.refreshToken, {
-        httpOnly: true,
-        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 kun
-      });
-      return {
-        ...tokens,
-      };
-    } catch (error) {
-      console.log(error);
+    if (!user) {
+      throw new UnauthorizedException('Email topilmadi yoki parol xato');
     }
+
+    // Check if the user is active
+    if (!user.is_active) {
+      throw new ConflictException('Bu foydalanuvchi aktivlashtirilmagan!');
+    }
+
+    // Check if the password matches
+    const passwordMatch = await bcrypt.compare(login.password, user.password);
+    if (!passwordMatch) {
+      throw new UnauthorizedException('Email topilmadi yoki parol xato');
+    }
+
+    // Generate tokens
+    const tokens = this.jwtService.generateTokens(user);
+
+    // Save the refresh token
+    user.refreshtoken = await bcrypt.hash(tokens.refreshToken, 10);
+    await this.userRepository.save(user);
+
+    // Store refresh token in a cookie
+    res.cookie('refreshToken', tokens.refreshToken, {
+      httpOnly: true,
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+    });
+
+    // Return tokens
+    return {
+      ...tokens,
+    };
   }
 
   // Yangi foydalanuvchini ro'yxatdan o'tkazish
@@ -94,6 +99,8 @@ export class UsersService {
     const token = this.jwtService.generateActivationToken(newUser);
     const activationLink = `http://localhost:4000/${token}`;
 
+    console.log('activate code ', activationLink); // debug
+
     await this.emailService.sendMail(
       newUser.email,
       'Hisobingizni aktivatsiya qiling',
@@ -110,7 +117,7 @@ export class UsersService {
   // Foydalanuvchini aktivatsiya qilish
   async activateUser(token: string) {
     const payload = this.jwtService.verifyActivationToken(token);
-    const user = await this.userRepository.findOneBy({ id: payload.sub });
+    const user = await this.userRepository.findOneBy({ id: payload.id });
 
     if (!user) {
       throw new NotFoundException('Foydalanuvchi topilmadi');
@@ -136,7 +143,9 @@ export class UsersService {
 
     // Aktivatsiya tokenini generatsiya qilish
     const token = this.jwtService.generateActivationToken(user);
-    const activationLink = `${env.active_link}${token}`;
+    const activationLink = `${env.HOST}/api/users/activate?token=${token}`;
+
+    console.log('resend activate ', activationLink); // debug
 
     // Aktivatsiya emailini jo'natish
     await this.emailService.sendMail(
@@ -150,7 +159,7 @@ export class UsersService {
   // Refresh tokenni yangilash va cookiega saqlash
   async refreshToken(refreshToken: string, res: Response) {
     const payload = this.jwtService.verifyRefreshToken(refreshToken);
-    const user = await this.userRepository.findOneBy({ id: payload.sub });
+    const user = await this.userRepository.findOneBy({ id: payload.id });
 
     if (!user || !user.refreshtoken) {
       throw new UnauthorizedException('Noto‘g‘ri refresh token');
@@ -161,7 +170,7 @@ export class UsersService {
       throw new UnauthorizedException('Noto‘g‘ri refresh token');
     }
 
-    // Yangi tokenlarni generatsiya qilish
+    // Yangi tokenlarni generatsiya qilishsub
     const tokens = this.jwtService.generateTokens(user);
 
     // Yangi refresh tokenni hash qilib saqlash
@@ -230,10 +239,11 @@ export class UsersService {
   }
 
   // ID bo'yicha foydalanuvchini o'chirish (deaktivatsiya qilish)
-  async remove(id: number): Promise<void> {
+  async remove(id: number) {
     const user = await this.findOne(id);
     user.is_active = false; // Foydalanuvchini deaktivatsiya qilish
     await this.userRepository.save(user);
+    return { message: 'Foydalanuvchi o`chirildi!' };
   }
 
   // Parolni unutish (Forgot Password)
@@ -255,7 +265,7 @@ export class UsersService {
       'reset-password',
       { resetLink },
     );
-    console.log(resetLink);
+    console.log('forgot pass ', resetLink); //debug
 
     return { message: 'Emailingiz habar yuborildi!' };
   }
@@ -263,7 +273,7 @@ export class UsersService {
   // Parolni tiklash (Reset Password)
   async resetPassword(token: string, newPassword: string) {
     const payload = this.jwtService.verifyPasswordResetToken(token);
-    const user = await this.userRepository.findOneBy({ id: payload.sub });
+    const user = await this.userRepository.findOneBy({ id: payload.id });
 
     if (!user) throw new NotFoundException('Foydalanuvchi topilmadi');
 

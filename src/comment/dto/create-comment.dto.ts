@@ -18,11 +18,6 @@ export class CreateCommentDto {
   })
   comment: string;
 
-  @IsInt({ message: "Foydalanuvchi ID faqat butun son bo'lishi kerak." })
-  @IsNotEmpty({ message: 'Foydalanuvchi ID raqamini kiritish majburiy.' })
-  @ApiProperty({ description: 'Foydalanuvchi ID raqami', example: 1 })
-  userId: number;
-
   @IsInt({ message: "Mashina ID faqat butun son bo'lishi kerak." })
   @IsNotEmpty({ message: 'Mashina ID raqamini kiritish majburiy.' })
   @ApiProperty({ description: 'Mashina ID raqami', example: 1 })

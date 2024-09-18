@@ -47,7 +47,11 @@ export class RegionService {
     return region;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} region`;
+  async remove(id: number) {
+    const region = await this.regionRepo.findOneBy({ id });
+
+    if (!region) throw new NotFoundException('Bunday region topilmadi!');
+
+    return { message: 'Region muvofaqqiyatli o`chirildi!' };
   }
 }

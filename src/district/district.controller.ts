@@ -7,7 +7,7 @@ import {
   Delete,
   Put,
   Query,
-  UseGuards,
+  // UseGuards,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -16,21 +16,21 @@ import {
   ApiBody,
   ApiParam,
   ApiQuery,
-  ApiBearerAuth, // Import ApiBearerAuth
+  // ApiBearerAuth,
 } from '@nestjs/swagger';
 import { DistrictService } from './district.service';
 import { CreateDistrictDto } from './dto/create-district.dto';
 import { UpdateDistrictDto } from './dto/update-district.dto';
-import { AdminGuard } from '../common/guards/AdminGuard';
+// import { AdminGuard } from '../common/guards/AdminGuard';
 
-@ApiTags('District') // Swagger tag for grouping
+@ApiTags('Tumanlar')
 @Controller('district')
 export class DistrictController {
   constructor(private readonly districtService: DistrictService) {}
 
-  @UseGuards(AdminGuard)
-  @ApiBearerAuth() // Add Bearer Auth to this endpoint
-  @Post()
+  // @UseGuards(AdminGuard)
+  // @ApiBearerAuth() // Add Bearer Auth to this endpoint
+  @Post('add')
   @ApiOperation({ summary: 'Yangi tuman yaratish' })
   @ApiResponse({ status: 201, description: 'Tuman muvaffaqiyatli yaratildi.' })
   @ApiBody({ type: CreateDistrictDto })
@@ -58,8 +58,8 @@ export class DistrictController {
     return this.districtService.findOne(+id);
   }
 
-  @UseGuards(AdminGuard)
-  @ApiBearerAuth() // Add Bearer Auth to this endpoint
+  // @UseGuards(AdminGuard)
+  // @ApiBearerAuth()
   @Put(':id')
   @ApiOperation({ summary: 'Tumanni yangilash' })
   @ApiResponse({ status: 200, description: 'Tuman muvaffaqiyatli yangilandi.' })
@@ -74,8 +74,8 @@ export class DistrictController {
     return this.districtService.update(+id, updateDistrictDto);
   }
 
-  @UseGuards(AdminGuard)
-  @ApiBearerAuth() // Add Bearer Auth to this endpoint
+  // @UseGuards(AdminGuard)
+  // @ApiBearerAuth()
   @Delete(':id')
   @ApiOperation({ summary: "Tumanni o'chirish" })
   @ApiResponse({ status: 200, description: "Tuman muvaffaqiyatli o'chirildi." })

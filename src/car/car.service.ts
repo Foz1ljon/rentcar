@@ -41,17 +41,17 @@ export class CarService {
   async addCar(addCar: CreateCarDto, token: string) {
     const { id } = await this.verifyToken(token);
     const user = await this.userRepo.findOneBy({ id });
-    if (!user) throw new NotFoundException('User not found!');
+    if (!user) throw new NotFoundException('Bunday Foydalanuvchi topilmadi!');
 
     const district = await this.districtRepo.findOneBy({
       id: addCar.districtId,
     });
-    if (!district) throw new NotFoundException('District not found!');
+    if (!district) throw new NotFoundException('Tuman (Shahar) topilmadi!');
 
     const newCar = this.carRepo.create({ ...addCar, user, district });
     const savedCar = await this.carRepo.save(newCar);
 
-    return { message: 'Car created successfully!', data: savedCar };
+    return { message: 'Mashina qo`shildi!', data: savedCar };
   }
 
   // Update a car, ensuring only the owner can update it
@@ -59,7 +59,9 @@ export class CarService {
     // Decode the token to get the user ID
     const data = await this.verifyToken(token);
     const userId = data.id;
-    // Find the car by ID
+    const user = await this.userRepo.findOneBy({ id: userId });
+    if (!user) throw new NotFoundException('Bunday Foydalanuvchi topilmadi!');
+
     const car = await this.carRepo.findOne({
       where: { id },
       relations: ['user'],
@@ -69,7 +71,7 @@ export class CarService {
     if (!car) throw new NotFoundException('Car not found!');
 
     // Check if the authenticated user is the owner of the car
-    if (car.user.id !== userId) {
+    if (car.user.id !== userId || !user.admin) {
       throw new ForbiddenException('Sizda bunday ruxsat yo`q!');
     }
 
@@ -78,7 +80,8 @@ export class CarService {
       const district = await this.districtRepo.findOneBy({
         id: updateCarDto.districtId,
       });
-      if (!district) throw new NotFoundException('District not found!');
+      if (!district)
+        throw new NotFoundException('Bunday Tuman (Shahar) topilmadi!');
       car.district = district;
     }
 
@@ -88,7 +91,7 @@ export class CarService {
     // Save the updated car
     const updatedCar = await this.carRepo.save(car);
 
-    return { message: 'Car updated successfully!', data: updatedCar };
+    return { message: 'Mashina ma`lumotlari yangilandi!', data: updatedCar };
   }
 
   // Upload photo for a car
@@ -102,7 +105,7 @@ export class CarService {
     car.images.push(newImg);
     const updatedCar = await this.carRepo.save(car);
 
-    return { message: 'Photo uploaded successfully!', data: updatedCar };
+    return { message: 'Rasm yuklandi!', data: updatedCar };
   }
 
   // Remove a car photo
@@ -110,12 +113,12 @@ export class CarService {
     const car = await this.findCarWithImages(id);
     const photo = await this.imgRepo.findOneBy({ id: photoId, car: { id } });
 
-    if (!photo) throw new NotFoundException('Photo not found!');
+    if (!photo) throw new NotFoundException('Bunday rasm topilmadi!');
 
     await this.photoService.removeImageByUrl(photo.photo);
     await this.imgRepo.remove(photo);
 
-    return { message: 'Photo removed successfully!', data: car };
+    return { message: 'Rasm o`chirildi!', data: car };
   }
 
   // Find all cars with optional filters
@@ -158,18 +161,21 @@ export class CarService {
     const data = await this.verifyToken(token);
     const userId = data?.id;
     // Find the car by ID
+    const user = await this.userRepo.findOneBy({ id });
+    if (!user) throw new NotFoundException('Bunday Foydalanuvchi topilmadi!');
+
     const car = await this.carRepo.findOne({
       where: { id },
       relations: ['user'],
     });
 
-    if (car.user.id !== userId)
+    if (car.user.id !== userId || !user.admin)
       throw new ForbiddenException('Sizda bunday ruxsat yo`q!');
 
-    if (!car) throw new NotFoundException('Car not found!');
+    if (!car) throw new NotFoundException('Bunday mashina mavjud emas!');
 
     await this.carRepo.remove(car);
-    return { message: 'Car removed successfully!' };
+    return { message: 'Mashina o`chirildi!' };
   }
 
   private async findCarWithImages(id: number): Promise<Car> {
@@ -177,7 +183,7 @@ export class CarService {
       where: { id },
       relations: ['images'],
     });
-    if (!car) throw new NotFoundException('Car not found!');
+    if (!car) throw new NotFoundException('Mashina topilmadi!');
     return car;
   }
 

@@ -21,7 +21,7 @@ export class CreateCarDto {
 
   @ApiProperty({ description: 'Ishlab chiqarilgan yili', example: 2020 })
   @IsNumber()
-  @Min(1900, { message: "Yil 1900 yildan keyingi bo'lishi kerak" })
+  @Min(1990, { message: "Yil 1990 yildan keyingi bo'lishi kerak" })
   @Max(new Date().getFullYear(), {
     message: `Yil ${new Date().getFullYear()} yildan katta bo'lmasligi kerak`,
   })
@@ -55,10 +55,10 @@ export class CreateCarDto {
   condition: string;
 
   @ApiProperty({
-    description: 'Yoqilgʻi turi (benzin, dizel, elektr)',
+    description: 'Yoqilgʻi turi (benzin, dizel, elektr, gibrid)',
     example: 'Benzin',
   })
-  @IsString()
+  @IsString({ message: 'Ma`lumot string ko`rinishda bo`lishi kerak!' })
   @IsNotEmpty({ message: 'Yoqilgʻi turi majburiy' })
   fuelType: string;
 
@@ -66,7 +66,7 @@ export class CreateCarDto {
     description: 'Mashina joylashgan viloyat ID raqami',
     example: 1,
   })
-  @IsNumber()
+  @IsNumber({}, { message: 'Region id raqam ko`rinishida bo`lish kerak!' })
   @IsNotEmpty({ message: 'Viloyat majburiy' })
   regionId: number;
 
@@ -74,7 +74,7 @@ export class CreateCarDto {
     description: 'Mashina joylashgan tuman ID raqami',
     example: 1,
   })
-  @IsNumber()
+  @IsNumber({}, { message: 'Tuman id raqam ko`rinishida bo`lish kerak!' })
   @IsNotEmpty({ message: 'Tuman majburiy' })
   districtId: number;
 }

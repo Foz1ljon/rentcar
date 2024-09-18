@@ -50,16 +50,19 @@ export class DistrictService {
   async findOne(id: number) {
     const district = await this.districtRepo.findOne({
       where: { id },
-      relations: ['region'], // Include the region relation
+      relations: ['region'],
     });
     if (!district) {
-      throw new NotFoundException('Bunday tuman topilmadi!'); // Adjusted condition
+      throw new NotFoundException('Bunday tuman topilmadi!');
     }
     return district;
   }
 
   async update(id: number, updDistrictDto: UpdateDistrictDto) {
-    const district = await this.districtRepo.findOneBy({ id });
+    const district = await this.districtRepo.findOne({
+      where: { id },
+      relations: ['region'],
+    });
 
     if (!district) throw new NotFoundException('Bunday tuman topilmadi!');
 

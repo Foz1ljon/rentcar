@@ -13,7 +13,7 @@ import {
 import { CommentService } from './comment.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
-import { ApiResponse, ApiTags, ApiQuery } from '@nestjs/swagger';
+import { ApiResponse, ApiTags, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
 import { Comment } from './entities/comment.entity';
 import { JwtAuthGuard } from '../common/guards/UserGuard';
 
@@ -23,6 +23,7 @@ export class CommentController {
   constructor(private readonly commentService: CommentService) {}
 
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @Post()
   @ApiResponse({
     status: 201,
@@ -86,6 +87,7 @@ export class CommentController {
     return this.commentService.findOne(+id);
   }
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @Put(':id')
   @ApiResponse({
     status: 200,
@@ -108,6 +110,7 @@ export class CommentController {
     return this.commentService.update(+id, updateCommentDto, token);
   }
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @Delete(':id')
   @ApiResponse({
     status: 200,
